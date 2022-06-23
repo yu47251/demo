@@ -1,0 +1,86 @@
+---
+consul:
+  host: 192.168.18.21
+  port: 8500
+  address: ${consul.host}:${consul.port}
+  token: 227619fe-a4a5-bc1c-45b0-908a65503078
+mysql:
+  host: ${mysql.default.host:192.168.1.121}
+  port: ${mysql.default.port:3306}
+  dbname: ms-sample
+  username: ${mysql.default.username:root}
+  password: ${mysql.default.password:QWqw_+12}
+mongodb:
+  username: root
+  password: QWqw_+12
+  uri: 192.168.1.121:27017
+  dbname: ms-sample
+  auth-database: admin
+---
+spring:
+  application:
+    name: service-user
+  profiles:
+    active: local
+---
+# 服务端口
+server:
+  port: 18100
+  servlet:
+    context-path: /
+---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, env, prometheus, consul
+---
+spring:
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  servlet:
+    multipart:
+      max-file-size: 20MB
+---
+spring:
+  config:
+    import: optional:consul:${consul.address}
+  cloud:
+    consul:
+      host: ${consul.host}
+      port: ${consul.port}
+      config:
+        enabled: true
+        format: yaml
+        prefixes: ${spring.profiles.active}
+        acl-token: ${consul.token}
+        default-context: application
+        data-key: data
+      discovery:
+        service-name: ${spring.application.name}
+        instance-id: ${spring.application.name}-${random.uuid}
+        enabled: true
+        heartbeat:
+          enabled: false
+        prefer-ip-address: true
+        acl-token: ${consul.token}
+---
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname}?characterEncoding=utf8&useUnicode=true&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: ${mysql.username}
+    password: ${mysql.password}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
+---
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${mongodb.username}:${mongodb.password}@${mongodb.uri}/${mongodb.dbname}?authSource=${mongodb.auth-database}&readPreference=secondary

@@ -1,0 +1,83 @@
+---
+consul:
+  host: 192.168.18.21
+  port: 8500
+  address: ${consul.host}:${consul.port}
+  token: 227619fe-a4a5-bc1c-45b0-908a65503078
+---
+spring:
+  application:
+    name: gateway
+  profiles:
+    active: local
+---
+# 服务端口
+server:
+  port: 18000
+  servlet:
+    context-path: /
+---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, env, prometheus, consul
+---
+spring:
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  servlet:
+    multipart:
+      max-file-size: 20MB
+---
+spring:
+  config:
+    import: optional:consul:${consul.address}
+  cloud:
+    consul:
+      host: ${consul.host}
+      port: ${consul.port}
+      config:
+        enabled: true
+        format: yaml
+        prefixes: ${spring.profiles.active}
+        acl-token: ${consul.token}
+        default-context: application
+        data-key: data
+      discovery:
+        service-name: ${spring.application.name}
+        instance-id: ${spring.application.name}-${random.uuid}
+        enabled: true
+        heartbeat:
+          enabled: false
+        prefer-ip-address: true
+        acl-token: ${consul.token}
+---
+spring:
+  config:
+    import: optional:consul:${consul.address}
+---
+spring:
+  redis:
+    database: 0
+    host: 192.168.1.121
+    port: 6379
+    password: QWqw_+12
+    lettuce:
+      cluster:
+        refresh:
+          period: 10s
+          adaptive: true
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: service-user
+        uri: lb://zjyd-user
+        predicates:
+          - Path=/api/users/**
+        filters:
+          - StripPrefix=2
+
