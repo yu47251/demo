@@ -1,33 +1,37 @@
 ---
-# 以下内容在nacos中进行配置
+# ?????nacos?????
 consul:
   host: 192.168.18.21
   port: 8500
   address: 192.168.18.21:8500
   token: 227619fe-a4a5-bc1c-45b0-908a65503078
 mysql:
-  host: 192.168.1.123
+  host: 192.168.1.121
   port: 3306
-  dbname: user-center
+  dbname: resource-center
   username: root
   password: QWqw_+12
 mongodb:
   username: root
   password: QWqw_+12
   uri: 192.168.1.121:27017
-  dbname: user-center
+  dbname: resource-center
   auth-database: admin
-# 以上内容在nacos中进行配置
+redis:
+  host: 192.168.1.121
+  port: 6379
+  password: QWqw_+12
+# ?????nacos?????
 ---
 spring:
   application:
-    name: service-user
+    name: service-resource-center
   profiles:
     active: local
 ---
-# 服务端口
+# ????
 server:
-  port: 18100
+  port: 18200
   servlet:
     context-path: /
 ---
@@ -86,3 +90,15 @@ spring:
   data:
     mongodb:
       uri: mongodb://${mongodb.username}:${mongodb.password}@${mongodb.uri}/${mongodb.dbname}?authSource=${mongodb.auth-database}&readPreference=secondary
+---
+spring:
+  redis:
+    database: 0
+    host: ${redis.host}
+    port: ${redis.port}
+    password: ${redis.password}
+    lettuce:
+      cluster:
+        refresh:
+          period: 10s
+          adaptive: true

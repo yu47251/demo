@@ -40,7 +40,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG"/>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="INFO"/>
     <logger name="org.springframework.cloud.bootstrap.encrypt.AbstractEnvironmentDecrypt" level="INFO"/>
     <springProfile name="!prod">
         <logger name="com.wlb.demo.dao.mapper" level="DEBUG"/>
