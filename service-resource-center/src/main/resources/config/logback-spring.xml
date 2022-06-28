@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <springProperty scope="context" name="APP_Name" source="spring.application.name"/>
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+    <contextName>${APP_Name}</contextName>
+    <property name="charset" value="UTF-8"/>
+
+    <property name="LOG_HOME" value="logs"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    org.springframework.boot.logging.logback.defaults.xml
+    <property name="LOGGING_ZIPKIN_PATTERN" value="[${APP_Name:-},%X{traceId:-},%X{spanId:-}]"/>
+    <property name="LOGGING_ZIPKIN_PATTERN_MINI" value="[%X{traceId:-},%X{spanId:-}]"/>
+    <!-- You can override this to have a custom pattern -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%-5level) [%clr(%d{HH:mm:ss.SSS}){faint}] %clr(---){faint} %clr([%t]){faint} %clr(%-40.40logger{39}){cyan}-[%4line] %X{elapsed:-} %clr(:){faint} %m${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}%n"/>
+    <property name="FILE_LOG_PATTERN" value="%-5level [%d{yyyy-MM-dd HH:mm:ss.SSS}] ${LOGGING_ZIPKIN_PATTERN_MINI:-} --- [%15.15t] %-40.40logger{39}-[%4line] %X{elapsed:-} : %m ${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}%n"/>
+
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${APP_Name}.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/${APP_Name}.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>${charset}</charset>
+        </encoder>
+    </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoder 默认配置为PatternLayoutEncoder -->
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>${charset}</charset>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="INFO"/>
+    <logger name="org.springframework.cloud.bootstrap.encrypt.AbstractEnvironmentDecrypt" level="INFO"/>
+    <springProfile name="!prod">
+        <logger name="com.wlb.demo.resource.dao.mapper" level="DEBUG"/>
+        <logger name="org.springframework.security" level="DEBUG"/>
+    </springProfile>
+
+    <!--</logger>-->
+    <root level="INFO">
+        <springProfile name="!prod">
+            <appender-ref ref="STDOUT"/>
+        </springProfile>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
